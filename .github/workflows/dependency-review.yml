@@ -1,0 +1,44 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  pull-requests: write
+
+# Prevent concurrent workflow runs for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Review Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail on critical and high severity vulnerabilities
+          fail-on-severity: moderate
+          # Warn on vulnerabilities
+          warn-on-severity: low
+          # Allow licenses commonly used in open source
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD
+          # Deny GPL licenses to avoid copyleft requirements
+          deny-licenses: GPL-2.0, GPL-3.0, LGPL-2.0, LGPL-2.1, LGPL-3.0

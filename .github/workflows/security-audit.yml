@@ -1,0 +1,69 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    # Run every day at 3:00 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.17.1'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --check-files
+
+      - name: Run Yarn Audit
+        id: yarn-audit
+        run: |
+          yarn audit --groups dependencies --level moderate || true
+          echo "audit_result=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Check for vulnerabilities
+        run: |
+          echo "Checking for security vulnerabilities..."
+          yarn audit --groups dependencies --level moderate > audit-report.txt 2>&1 || true
+          
+          if grep -q "vulnerabilities found" audit-report.txt; then
+            echo "⚠️ Security vulnerabilities detected!"
+            cat audit-report.txt
+            exit 1
+          else
+            echo "✅ No critical vulnerabilities found"
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: audit-report.txt
+          retention-days: 30
