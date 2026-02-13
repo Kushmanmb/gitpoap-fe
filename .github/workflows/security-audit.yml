@@ -43,21 +43,18 @@ jobs:
       - name: Run Yarn Audit
         id: yarn-audit
         run: |
-          yarn audit --groups dependencies --level moderate || true
-          echo "audit_result=$?" >> $GITHUB_OUTPUT
-        continue-on-error: true
-
-      - name: Check for vulnerabilities
-        run: |
           echo "Checking for security vulnerabilities..."
-          yarn audit --groups dependencies --level moderate > audit-report.txt 2>&1 || true
+          yarn audit --groups dependencies --level moderate > audit-report.txt 2>&1 || AUDIT_EXIT_CODE=$?
+          
+          cat audit-report.txt
           
           if grep -q "vulnerabilities found" audit-report.txt; then
             echo "⚠️ Security vulnerabilities detected!"
-            cat audit-report.txt
+            echo "audit_status=failed" >> $GITHUB_OUTPUT
             exit 1
           else
             echo "✅ No critical vulnerabilities found"
+            echo "audit_status=passed" >> $GITHUB_OUTPUT
           fi
 
       - name: Upload audit report
