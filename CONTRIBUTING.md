@@ -132,10 +132,50 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/gitpoa
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
 ### Your First Code Contribution
-<!-- TODO
-include Setup of env, IDE and typical getting started instructions?
 
--->
+Before starting work on a contribution, make sure your local branch is up to date with the latest changes from the upstream `main` branch. If you have local changes you want to discard and reset your working directory to match the remote, use `git reset --hard`:
+
+```bash
+# Fetch the latest changes from origin
+git fetch origin
+
+# Reset your current branch to match origin/main exactly,
+# discarding any local uncommitted changes
+git reset --hard origin/main
+```
+
+> ⚠️ **Warning:** `git reset --hard` permanently discards all uncommitted local changes (staged and unstaged). Make sure you have saved or stashed any work you want to keep before running this command.
+
+If you only want to undo the most recent commit while keeping the files on disk, use `--soft` instead:
+
+```bash
+# Undo the last commit but keep the changes staged
+git reset --soft HEAD~1
+```
+
+#### Typical Setup Steps
+
+1. Fork the repository on GitHub, then clone your fork locally:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/gitpoap-fe.git
+   cd gitpoap-fe
+   ```
+2. Add the upstream remote so you can pull in future updates:
+   ```bash
+   git remote add upstream https://github.com/gitpoap/gitpoap-fe.git
+   ```
+3. Install dependencies:
+   ```bash
+   yarn
+   ```
+4. Create a feature branch for your work:
+   ```bash
+   git checkout -b my-feature-branch
+   ```
+5. Make your changes, then run the test suite before opening a PR:
+   ```bash
+   yarn test
+   ```
 
 ## Styleguides
 
