@@ -7,6 +7,16 @@ on:
 
   workflow_dispatch:
 
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  pull-requests: read
+
+# Prevent concurrent workflow runs for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NEXT_PUBLIC_SENTRY_ENVIRONMENT: test
 
@@ -14,7 +24,14 @@ jobs:
   validate:
     name: Validate PR Description
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+          
       - name: Enforce Pull Request Description Length
         uses: ryanvade/enforce-pr-description-length-action@v1
         with:

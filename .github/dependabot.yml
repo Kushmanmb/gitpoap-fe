@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # Enable version updates for npm/yarn
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    # Limit number of open PRs
+    open-pull-requests-limit: 10
+    # Assign reviewers
+    reviewers:
+      - "Kushmanmb"
+    # Add labels for easy filtering
+    labels:
+      - "dependencies"
+      - "security"
+    # Group all patch updates together
+    groups:
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      minor-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+    # Semantic commit messages
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Allow both direct and indirect dependencies
+    versioning-strategy: increase
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Kushmanmb"
+    labels:
+      - "github-actions"
+      - "dependencies"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

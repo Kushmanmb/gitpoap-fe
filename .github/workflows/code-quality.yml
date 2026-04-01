@@ -1,0 +1,83 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  pull-requests: read
+
+# Prevent concurrent workflow runs for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT: test
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.17.1'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --check-files
+
+      - name: Run ESLint
+        run: npx eslint . --ext .ts,.tsx --max-warnings 0
+        continue-on-error: false
+
+      - name: Check code formatting
+        run: npx prettier --check "{src,__tests__}/**/*.{ts,tsx}"
+        continue-on-error: false
+
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.17.1'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --check-files
+
+      - name: Run TypeScript compiler
+        run: npx tsc --noEmit

@@ -1,0 +1,36 @@
+# CODEOWNERS - Defines individuals or teams responsible for code in this repository
+# These owners will be automatically requested for review when someone opens a pull request
+
+# Default owner for everything in the repo
+# This should be changed to the appropriate team or individuals
+*       @Kushmanmb
+
+# GitHub Actions workflows and configuration
+/.github/       @Kushmanmb
+/.github/workflows/     @Kushmanmb
+
+# Security and dependency management
+/SECURITY.md    @Kushmanmb
+/.github/dependabot.yml @Kushmanmb
+
+# Configuration files
+/*.json         @Kushmanmb
+/*.js           @Kushmanmb
+/*.ts           @Kushmanmb
+/.eslintrc.json @Kushmanmb
+/tsconfig.json  @Kushmanmb
+
+# Source code
+/src/           @Kushmanmb
+
+# Tests
+/__tests__/     @Kushmanmb
+/jest.*.ts      @Kushmanmb
+
+# Documentation
+/*.md           @Kushmanmb
+/docs/          @Kushmanmb
+
+# Infrastructure and deployment
+/next.config.js @Kushmanmb
+/sentry.*.js    @Kushmanmb

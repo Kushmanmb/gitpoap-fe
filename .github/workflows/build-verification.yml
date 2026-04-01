@@ -1,0 +1,70 @@
+name: Build Verification
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+
+# Prevent concurrent workflow runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT: test
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.17.1'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --check-files
+
+      - name: Build application
+        run: yarn build
+        env:
+          # Provide minimal required env vars for build
+          NEXT_PUBLIC_GITPOAP_API_URL: https://api.gitpoap.io
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+
+      - name: Check build output
+        run: |
+          if [ -d ".next" ]; then
+            echo "✅ Build successful - .next directory created"
+            ls -lah .next
+          else
+            echo "❌ Build failed - .next directory not found"
+            exit 1
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: .next
+          retention-days: 7
